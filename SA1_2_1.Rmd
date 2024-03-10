@@ -1,0 +1,84 @@
+---
+title: "Untitled"
+output: github_document
+---
+
+
+### 2. With your own computing experience, develop a front end to R that allows the user
+#### (a) to input the values of a univariate discrete random variable and the associated probabilities and to obtain the mean and variance. Do validity checks that the probabilities are in the interval [0, 1], and that they sum to one.
+```{r setup}
+distribution_title <- readline(prompt="Enter the title of the distribution: ")
+
+
+input_counter <- as.integer(readline(prompt="Enter the number of sample space: "))
+
+# Sample Space Vector
+sample_space <- c()
+# Probability Vector
+probabilities_u <- numeric()
+
+
+for (i in 1:input_counter) {
+  ss <- as.integer(readline(prompt="Enter the sample space: "))
+  sample_space <- c(sample_space, ss)
+  
+  if (i < input_counter) {
+    repeat {
+      ss_probability <- as.numeric(readline(prompt="Enter its corresponding probability: "))
+      
+      # Check if the probability is within the valid range
+      if (ss_probability >= 0 && ss_probability <= 1) {
+        probabilities_u <- c(probabilities_u, ss_probability)
+        print(paste0("Initial probability sum: ", sum(probabilities_u)))
+        break
+      } else {
+        cat("The probability must be between 0 and 1. Please enter a valid probability.\n")
+      }
+    }
+  } else {
+    remaining_probability <- 1 - sum(probabilities_u)
+    
+    # Check if the remaining probability is within the valid range before adding
+    if (remaining_probability >= 0 && remaining_probability <= 1) {
+      probabilities_u <- c(probabilities_u, remaining_probability)
+    } else {
+      cat("Error: Sum of entered probabilities exceeds 1. Please check your inputs.\n")
+      # Optionally, handle the error (e.g., reset the last entry, adjust the entire vector, etc.)
+    }
+  }
+}
+```
+
+##### SAMPLE SPACE:
+```{r}
+sample_space
+```
+##### PROBABILITY:
+```{r}
+probabilities_u
+```
+##### MEAN:
+```{r}
+distribution_mean <- sum(sample_space*probabilities_u)
+distribution_mean
+```
+##### VARIANCE:
+```{r}
+distribution_variance <- sum((sample_space - distribution_mean)^2 * probabilities_u)
+distribution_variance
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
