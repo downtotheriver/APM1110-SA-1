@@ -1,0 +1,163 @@
+---
+title: "Untitled"
+output: github_document
+---
+
+#### (b) to input the values of a bivariate discrete random variable and the associated probabilities and to obtain the marginal and conditional distributions.Your program should provide a facility to calculate the mean and variance of each distribution, and to plot the pdf and cdf. Do validity checks that the probabilities are in the interval [0, 1], and that they sum to one.
+```{r}
+# This will ask the user for the title of the distribution
+distribution_title <- readline(prompt="Enter the title of the distribution: ")
+
+
+# This will ask the user if how many sample space or elements there will be in x-axis
+input_counter_x <- as.integer(readline(prompt="Enter the number of sample space in X-axis: "))
+
+# Vector or list where the name of each x-value will be stored (EXAMPLE NAMES: Low, Medium, High)
+sample_space_x <- c()
+
+# This will ask the user for the name of each x-value
+for (i in 1:input_counter_x) {
+  ss_x <- readline(prompt="Enter the sample space: ")
+  sample_space_x <- c(sample_space_x, ss_x)
+}
+
+
+# This will ask the user if how many sample space or elements there will be in y-axis
+input_counter_y <- as.integer(readline(prompt="Enter the number of sample space in Y-axis: "))
+
+# Vector or list where the name of each y-value will be stored (EXAMPLE NAMES: Low, Medium, High)
+sample_space_y <- c()
+
+# This will ask the user for the name of each y-value
+for (i in 1:input_counter_y) {
+  ss_y <- readline(prompt="Enter the sample space: ")
+  sample_space_y <- c(sample_space_y, ss_y)
+}
+
+
+# Vector or list where all the variables from x-axis and y-axis will be stored
+probabilities_b <- numeric()
+
+# This will ask the user for each joint probabality, depending on the number of x- and y-axis
+input_counter <- input_counter_x*input_counter_y
+for (i in 1:input_counter) {
+  if (i < input_counter) {
+    repeat {
+      ss_probability <- as.numeric(readline(prompt="Enter its corresponding probability (NOTE: Enter variables BYROW): "))
+      
+      # Check if the probability is within the valid range
+      if (ss_probability >= 0 && ss_probability <= 1) {
+        probabilities_b <- c(probabilities_b, ss_probability)
+        print(paste0("Initial probability sum: ", sum(probabilities_b)))
+        break
+      } else {
+        cat("The probability must be between 0 and 1. Please enter a valid probability.\n")
+      }
+    }
+  } else {
+    remaining_probability <- 1 - sum(probabilities_b)
+    cat("Remaining probability added: ", remaining_probability)
+    
+    # Check if the remaining probability is within the valid range before adding
+    if (remaining_probability >= 0 && remaining_probability <= 1) {
+      probabilities_b <- c(probabilities_b, remaining_probability)
+    } else {
+      cat("Error: Sum of entered probabilities exceeds 1. Please check your inputs.\n")
+      # Optionally, handle the error (e.g., reset the last entry, adjust the entire vector, etc.)
+    }
+  }
+}
+```
+
+
+
+##### Matrix of the Bivariate Distribution:
+```{r}
+distribution <- matrix(probabilities_b, input_counter_x, input_counter_y, byrow = TRUE)
+rownames(distribution) <- sample_space_y
+colnames(distribution) <- sample_space_x
+distribution
+```
+
+##### MARGINAL DISTRIBUTIONS
+Marginal Distribution along the X-axis (columns):
+```{r}
+marginal_distribution_x <- colSums(distribution)
+marginal_distribution_x
+```
+Marginal Distribution along the Y-axis (rows):
+```{r}
+marginal_distribution_y <- rowSums(distribution)
+print("Marginal Distribution along the Y-axis (rows):")
+print(marginal_distribution_y)
+```
+
+##### CONDITIONAL DISTRIBUTIONS
+Conditional Distribution of X given Y
+P(X=L|Y=L)
+```{r}
+conditional_distribution_x_given_y <- sweep(distribution, 1, marginal_distribution_y, "/")
+print("Conditional Distribution of X given Y:")
+print(conditional_distribution_x_given_y)
+
+```
+Conditional Distribution of Y given X
+```{r}
+conditional_distribution_y_given_x <- sweep(distribution, 2, marginal_distribution_x, "/")
+print("Conditional Distribution of Y given X:")
+print(conditional_distribution_y_given_x)
+```
+
+##### PLOTTING THE PROBABILITY MASS FUNCTION
+```{r}
+library(ggplot2)
+
+prob_df <- as.data.frame(as.table(distribution))
+
+# Plotting
+ggplot(prob_df, aes(Var1, Var2, fill = Freq)) + 
+  geom_tile() + 
+  geom_text(aes(label = sprintf("%.2f", Freq)), color = "black") +
+  scale_fill_gradient(low = "white", high = "blue") +
+  labs(x = "Variable X", y = "Variable Y", fill = "Probability") +
+  theme_minimal() +
+  ggtitle(distribution_title)
+```
+
+##### PLOTTING THE CUMULATIVE DISTRIBUTION FUNCTION
+```{r}
+x_axis_labels <- c()
+for (i in 1:length(sample_space_y)) {
+  for (j in 1:length(sample_space_x)) {
+    x_y_label <- paste(sample_space_y[i], sample_space_x[j], sep = "_")
+    x_axis_labels <- c(x_axis_labels, x_y_label)
+  }
+}
+x_values <- 1:length(x_axis_labels)
+
+y <- cumsum(probabilities_b)
+
+plot(x_values, y, type = "s",
+     xlab = "Sample Space", ylab = "Cumulative probability (P(X<=x))",
+     main = distribution_title, xaxt = 'n')
+
+# Add custom x-axis labels
+axis(1, at = x_values, labels = x_axis_labels, las = 1)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
